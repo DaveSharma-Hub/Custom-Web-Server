@@ -57,25 +57,35 @@ void Server::ServerConnection::startListening(){
         char buffer[30000] = {0};
         valread = read( new_socket , buffer, 30000);
         printf("%s\n",buffer );
-        string arr = findFile();
-        // string arr="HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 5\n\n<h1>hello world</h1>";
-        char message[arr.length()+100]={0};
-        for(int i=0;i<arr.length();i++){
-            message[i] = arr[i];
+        string fileName = parseHeaderRequest(buffer);
+        if(imageFile(fileName.c_str())){
+            string tmp = "HTTP/1.1 200 OK\nContent-Type: image/jpeg\nContent-Length: 1024\n\n";
+            // while(int send_res=send(new_socket,message,sizeof(message),0)){
+
+            // }
+
+        }else{
+            string arr = findFile(fileName.c_str());
+            char message[arr.length()+100]={0};
+            for(int i=0;i<arr.length();i++){
+                message[i] = arr[i];
+            }
+            printf("%s\n",message);
+            // write(new_socket , hello , strlen(hello));
+            int send_res=send(new_socket,message,sizeof(message),0);
         }
-        printf("%s\n",message);
-        // write(new_socket , hello , strlen(hello));
-        int send_res=send(new_socket,message,sizeof(message),0);
 
         printf("------------------Hello message sent-------------------\n");
         close(new_socket);
     }
 }
 
-string Server::ServerConnection::findFile(){
+string Server::ServerConnection::findFile(const char* fileName){
+    string fileLocation = string(fileName);
     ifstream file;
     string tmp="";
-    file.open("C:/Users/Daves/git/Custom-Web-Server/FileDirectory/exampleWebsite.html");
+    cout<<fileName;
+    file.open("C:/Users/Daves/git/Custom-Web-Server/FileDirectory/"+fileLocation);
     if(!file.is_open())
     {
         cout<<"Unable to open the file."<<endl;
@@ -113,7 +123,31 @@ string Server::ServerConnection::initMessage(int length){
     return tmp;
 }
 
+string Server::ServerConnection::parseHeaderRequest(char* header){
+    string buffer = string(header);
+    string tmp="";
+    for(int i=5;i<buffer.length()-5;i++){
+        if(buffer[i]==' '&&buffer[i+1]=='H'&&buffer[i+2]=='T'&&buffer[i+3]=='T'&&buffer[i+4]=='P'){
+            break;
+        }
+        else{
+            tmp+=buffer[i];
+        }
+    }
+    return tmp;
+}
 
+bool Server::ServerConnection::imageFile(const char* fileName){
+    string tmp = string(fileName);
+    string type = "";
+    type += tmp[tmp.length()-3];
+    type += tmp[tmp.length()-2];
+    type += tmp[tmp.length()-1];
+    if(type=="jpg" ||type=="png" ||type=="peg"){
+        return true;
+    }
+    return false;
+}
 
 // void Server::ServerConnection::setMessage(char* msg){
 //     char* tmp = msg;

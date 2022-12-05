@@ -36,10 +36,11 @@ namespace Server{
             void setup_func();
             void startListening();
             void setMessage(char* msg);
-            std::string findFile();
+            std::string findFile(const char* file);
             std::string initMessage(int length);
+            std::string parseHeaderRequest(char* buffer);
+            bool imageFile(const char* buffer);
     };
 }
-
 
 #endif
