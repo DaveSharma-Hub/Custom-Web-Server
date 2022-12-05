@@ -2,6 +2,7 @@
 #include <iostream>
 #include <unistd.h>
 #include "ServerUtils/ServerConnection.cpp"
+#include <fstream>
 
 using namespace std;
 int main(){
