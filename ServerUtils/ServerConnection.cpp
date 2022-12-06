@@ -58,67 +58,103 @@ void Server::ServerConnection::startListening(){
         valread = read( new_socket , buffer, 30000);
         printf("%s\n",buffer );
         string fileName = parseHeaderRequest(buffer);
-        if(imageFile(fileName.c_str())){
-            string tmp = "HTTP/1.1 200 OK\nContent-Type: image/jpeg\nContent-Length: 1024\n\n";
-            // while(int send_res=send(new_socket,message,sizeof(message),0)){
-
-            // }
-
-        }else{
-            string arr = findFile(fileName.c_str());
-            char message[arr.length()+100]={0};
-            for(int i=0;i<arr.length();i++){
-                message[i] = arr[i];
-            }
-            printf("%s\n",message);
-            // write(new_socket , hello , strlen(hello));
-            int send_res=send(new_socket,message,sizeof(message),0);
+        string fileType = getFileType(fileName.c_str());
+        string arr = findFile(fileName.c_str(),fileType.c_str());
+        char message[arr.length()+100]={0};
+        for(int i=0;i<arr.length();i++){
+            message[i] = arr[i];
         }
+        // printf("%d\n",sizeof(message));
+        // write(new_socket , hello , strlen(hello));
+       int send_value = send(new_socket,message,sizeof(message),0);
+
+        
+        // int send_res=send(new_socket,message,sizeof(message),0);
+        
 
         printf("------------------Hello message sent-------------------\n");
         close(new_socket);
     }
 }
 
-string Server::ServerConnection::findFile(const char* fileName){
-    string fileLocation = string(fileName);
-    ifstream file;
-    string tmp="";
-    cout<<fileName;
-    file.open("C:/Users/Daves/git/Custom-Web-Server/FileDirectory/"+fileLocation);
-    if(!file.is_open())
-    {
-        cout<<"Unable to open the file."<<endl;
-        string failed =  "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 22\n\n<h1>404 Not Found</h1>";
-        return failed;
-    }
-    
-    string line;
-    while(getline(file, line))
-    {
-        // cout<<line<<endl;
-        tmp+=line;
-    }
-    
-    file.close();
-    // cout<<tmp.length();
-    string header = initMessage(tmp.length());
-    header+=tmp;
-    return header;
-    
-    // message = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+string Server::ServerConnection::findFile(const char* fileName,const char* fileType){
+    if(fileType=="jpg" || fileType=="jpeg" || fileType=="png"){
+            string fileLocation = string(fileName);
+            string tmp="";
+            ifstream image;
+            string file = "C:/Users/Daves/git/Custom-Web-Server/FileDirectory/"+fileLocation;
+            FILE* file_stream = fopen(file.c_str(), "rb");
 
-    // message = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 97\n\n<div><h1>Cool Website</h1><p>Definitely Check Out the socials</p><button>Click Me</button></div>";
-    // for(int i=0;i<length+tmp.length();i++){
-    //     cout<<message[i];
-    // }
-    //  std::string path = "../FileDirectory";
-    // for (const auto & entry : fs::directory_iterator(path))
-    //     std::cout << entry.path() << std::endl;
+             std::vector<char> buffer;
+            int file_size;
+            //... other code here
+
+            if(file_stream != nullptr)
+            {
+                fseek(file_stream, 0, SEEK_END);
+                long file_length = ftell(file_stream);
+                rewind(file_stream);
+
+                buffer.resize(file_length);
+
+                file_size = fread(&buffer[0], 1, file_length, file_stream);
+                string fileToString ="";
+                for(char i: buffer){
+                    cout<<i<<endl;
+                    fileToString += i;
+                }
+                string header = initMessage(file_size,fileType);
+                header+=fileToString;
+                return header;
+            }
+            else{
+                cout<<"Unable to open the file."<<endl;
+                string failed =  "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 22\n\n<h1>404 Not Found</h1>";
+                return failed;
+            }
+        }
+    else{
+        string fileLocation = string(fileName);
+        ifstream file;
+        string tmp="";
+        cout<<fileName;
+        file.open("C:/Users/Daves/git/Custom-Web-Server/FileDirectory/"+fileLocation);
+        if(!file.is_open())
+        {
+            cout<<"Unable to open the file."<<endl;
+            string failed =  "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 22\n\n<h1>404 Not Found</h1>";
+            return failed;
+        }
+        
+        string line;
+        while(getline(file, line))
+        {
+            tmp+=line;
+            // cout<<line<<endl;
+        }
+        
+        file.close();
+        string header = initMessage(tmp.length(),fileType);
+        header+=tmp;
+        return header;
+    }
 }
 
-string Server::ServerConnection::initMessage(int length){
-    string tmp = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "+std::to_string(length)+"\n\n";
+string Server::ServerConnection::initMessage(int length,const char* typeOfFile){
+    string fileType = string(typeOfFile);
+    string tmp;
+    if(fileType=="html"){
+         tmp = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "+std::to_string(length)+"\n\n";
+    }
+    else if(fileType=="jpg" || fileType=="JPG" ){
+         tmp = "HTTP/1.1 200 OK\nContent-Type: image/jpeg\nContent-Length: "+std::to_string(length)+"\n\n";
+    }
+    else if(fileType=="js"){
+         tmp = "HTTP/1.1 200 OK\nContent-Type: text/js\nContent-Length: "+std::to_string(length)+"\n\n";
+    }
+    else{
+         tmp = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "+std::to_string(length)+"\n\n";
+    }
     // cout<<message<<endl;
     return tmp;
 }
@@ -137,23 +173,39 @@ string Server::ServerConnection::parseHeaderRequest(char* header){
     return tmp;
 }
 
-bool Server::ServerConnection::imageFile(const char* fileName){
-    string tmp = string(fileName);
-    string type = "";
-    type += tmp[tmp.length()-3];
-    type += tmp[tmp.length()-2];
-    type += tmp[tmp.length()-1];
-    if(type=="jpg" ||type=="png" ||type=="peg"){
-        return true;
+std::string Server::ServerConnection::getFileType(const char* file){
+    string fileName = string(file);
+    string tmp="";
+    int i=0;
+    for(;i<fileName.length();i++){
+        if(fileName[i]=='.'){
+            i++;
+            break;
+        }
     }
-    return false;
+    for(;i<fileName.length();i++){
+        tmp+=fileName[i];
+    }
+    return tmp;
 }
 
-// void Server::ServerConnection::setMessage(char* msg){
-//     char* tmp = msg;
-//     while(tmp!="\n"){
-//         while(){
+void Server::ServerConnection::listenRest(){
+    while(1)
+    {
+        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
+        {
+            perror("In accept");
+            exit(EXIT_FAILURE);
+        }
+        
+        char buffer[30000] = {0};
+        valread = read( new_socket , buffer, 30000);
+        printf("%s\n",buffer );
+       
+       int send_value = send(new_socket,message,sizeof(message),0);        
 
-//         }
-//     }
-// }
+        printf("------------------Hello message sent-------------------\n");
+        close(new_socket);
+    }
+}

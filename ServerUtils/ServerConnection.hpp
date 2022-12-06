@@ -13,6 +13,7 @@
 #include <experimental/filesystem>
 #include <fstream>
 
+
 namespace Server{
     class ServerConnection{
         private:
@@ -36,10 +37,11 @@ namespace Server{
             void setup_func();
             void startListening();
             void setMessage(char* msg);
-            std::string findFile(const char* file);
-            std::string initMessage(int length);
+            std::string findFile(const char* file,const char* fileType);
+            std::string initMessage(int length,const char* fileType);
             std::string parseHeaderRequest(char* buffer);
-            bool imageFile(const char* buffer);
+            std::string getFileType(const char* buffer);
+            void listenRest();
     };
 }
 
