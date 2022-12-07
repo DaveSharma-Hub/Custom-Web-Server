@@ -8,6 +8,7 @@ Server::ServerConnection::ServerConnection(int domain,int type, int protocol,int
     type=type;
     protocol=protocol;
     port=port;
+    addrlen = sizeof(address);
 
      if ((server_fd = socket(domain, type, protocol)) == 0)
     {
@@ -202,10 +203,80 @@ void Server::ServerConnection::listenRest(){
         char buffer[30000] = {0};
         valread = read( new_socket , buffer, 30000);
         printf("%s\n",buffer );
-       
-       int send_value = send(new_socket,message,sizeof(message),0);        
+        char message[1000]="HTTP/1.1 200 OK\nContent-Type: text/json\nContent-Length: 20\n\n{id:'1',name:'John'}";
+        //const char* message= tmp.c_str();
+        int send_value = send(new_socket,message,sizeof(message),0);        
 
         printf("------------------Hello message sent-------------------\n");
         close(new_socket);
     }
 }
+
+void Server::ServerConnection::listenRest(std::vector<Endpoints::endpoint>& input){
+    while(1)
+    {
+        printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+        if ((new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen))<0)
+        {
+            perror("In accept");
+            exit(EXIT_FAILURE);
+        }
+        
+        char buffer[30000] = {0};
+        valread = read( new_socket , buffer, 30000);
+        printf("%s\n",buffer );
+        // char message[1000]="HTTP/1.1 200 OK\nContent-Type: text/json\nContent-Length: 85\n\n[{id:'0',name:'John'},{id:'1',name:'Bob'},{id:'2',name:'Katy'},{id:'3',name:'Tina'},]";
+        string tmp = checkEndpoints(buffer,input);
+        string totalMessage = "HTTP/1.1 200 OK\nContent-Type: text/json\nContent-Length: "+to_string(tmp.length())+"\n\n"+tmp;
+        char message[totalMessage.length()]={};
+        for(int i=0;i<totalMessage.length();i++){
+            message[i] = totalMessage[i];
+        }
+        // const char* message= totalMessage.c_str();
+        // cout<<message<<endl;
+        int send_value = send(new_socket,message,sizeof(message),0);        
+
+        printf("------------------Hello message sent-------------------\n");
+        close(new_socket);
+    }
+}
+
+std::string Server::ServerConnection::checkEndpoints(char* input,std::vector<Endpoints::endpoint>& endpoints){
+    
+    string type = getRestType(input);
+    string endpointName = getEndpointName(input);
+
+    for(Endpoints::endpoint eachEndpoint:endpoints){
+        if(eachEndpoint.getEndpointApi()==endpointName){
+            return eachEndpoint.evaluateFunction();
+        }
+    }
+    return "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: 22\n\n<h1>404 Not Found</h1>";
+}  
+
+std::string Server::ServerConnection::getRestType(char* input){
+    string tmp = string(input);
+    string type ="";
+    int i=0;
+
+    while(tmp[i]!=' '){
+        type+=tmp[i];
+        i++;
+    }
+    return type;
+}
+std::string Server::ServerConnection::getEndpointName(char* input){
+    string tmp = string(input);
+    string name ="";
+    int i=0;
+
+    while(tmp[i]!='/'){
+        i++;
+    }
+    while(tmp[i]!=' '){
+        name+=tmp[i];
+        i++;
+    }
+    return name;
+}
+

@@ -1,0 +1,11 @@
+/test
+.exe
+.vscode
+.jpg
+.jpeg
+.png
+.mp4
+/FileDirectory
+/node_modules
+package.json
+package-lock.json

@@ -12,7 +12,8 @@
 #include <filesystem>
 #include <experimental/filesystem>
 #include <fstream>
-
+#include <vector>
+#include "Endpoint.cpp"
 
 namespace Server{
     class ServerConnection{
@@ -42,6 +43,10 @@ namespace Server{
             std::string parseHeaderRequest(char* buffer);
             std::string getFileType(const char* buffer);
             void listenRest();
+            void listenRest(std::vector<Endpoints::endpoint>& input);
+            std::string checkEndpoints(char* input,std::vector<Endpoints::endpoint>& endpoints);
+            std::string getRestType(char* input);
+            std::string getEndpointName(char* input);
     };
 }
 
