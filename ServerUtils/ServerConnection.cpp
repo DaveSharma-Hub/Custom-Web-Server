@@ -56,6 +56,7 @@ void Server::ServerConnection::startListening(){
         }
         
         char buffer[30000] = {0};
+        memset(buffer,0,sizeof(buffer));
         valread = read( new_socket , buffer, 30000);
         printf("%s\n",buffer );
         string fileName = parseHeaderRequest(buffer);
@@ -63,6 +64,7 @@ void Server::ServerConnection::startListening(){
         string arr = findFile(fileName.c_str(),fileType.c_str());
         //if(fileType!="jpg" && fileType!="jpeg" && fileType!="png"){
             char message[arr.length()+100]={0};
+            memset(message,0,sizeof(buffer));
             for(int i=0;i<arr.length();i++){
                 message[i] = arr[i];
             }
@@ -91,14 +93,16 @@ string Server::ServerConnection::findFile(const char* fileName,const char* fileT
                 char Buffer[100000] ={};
                 int len;
                 fread(Buffer,sizeof(Buffer),1, file_stream);
-                // while ((len = fread(Buffer,sizeof(Buffer),1, file_stream)) > 0)
-                // {      
-                //     header += string(Buffer);      
-                //     send(new_socket,header.c_str(),header.length(),0);            
-                // }
-                std::string header = "HTTP/1.1 200 OK\nContent-Type: text/jpeg\nContent-Length: "+to_string(sizeof(Buffer))+"\n\n";
-                header+=string(Buffer);
-                return header;
+                while ((len = fread(Buffer,sizeof(Buffer),1, file_stream)) > 0)
+                {      
+                    std::string header = "HTTP/1.1 200 OK\nContent-Type: text/jpeg\nContent-Length: "+to_string(len)+"\n\n";
+                    header += string(Buffer);      
+                    send(new_socket,header.c_str(),header.length(),0);            
+                    cout<<header;
+                }
+                // header+=string(Buffer);
+                // return header;
+                std::string header = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 0\n\n";
             }
             else{
                 // cout<<"Unable to open the file."<<endl;
@@ -140,10 +144,13 @@ string Server::ServerConnection::initMessage(int length,const char* typeOfFile){
          tmp = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "+std::to_string(length)+"\n\n";
     }
     else if(fileType=="jpg" || fileType=="JPG" ){
-         tmp = "HTTP/1.1 200 OK\nContent-Type: image/jpeg\nContent-Length: "+std::to_string(length)+"\n\n";
+         tmp = "HTTP/1.1 200 OK\nContent-Type: image/jpg\nContent-Length: "+std::to_string(length)+"\n\n";
     }
     else if(fileType=="js"){
          tmp = "HTTP/1.1 200 OK\nContent-Type: text/js\nContent-Length: "+std::to_string(length)+"\n\n";
+    }
+    else if(fileType=="css"){
+         tmp = "HTTP/1.1 200 OK\nContent-Type: text/css\nContent-Length: "+std::to_string(length)+"\n\n";
     }
     else{
          tmp = "HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: "+std::to_string(length)+"\n\n";

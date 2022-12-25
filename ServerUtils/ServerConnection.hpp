@@ -17,7 +17,7 @@
 
 namespace Server{
     class ServerConnection{
-        private:
+        protected:
             int server_fd;
             int new_socket;
             struct sockaddr_in address;
