@@ -1,7 +1,7 @@
 # Custom-Web-Server
 *In Progress*
 ## Description
-Creating a custom webserver from scratch similar to a Node.js server that can either host custom websites or create RESTful api endpoints using sockets
+Creating a custom webserver from scratch similar to a Node.js server that can either host custom websites or create RESTful api endpoints using c++ web-sockets.
 
 ## Usage
 Clone repository
@@ -17,8 +17,9 @@ int main(){
   newServer.startListening();
 }
 ```
-Will start listening on port 8000
+Will start listening on port 8000. Store custom html, js, and css files (website) in the File Directory folder to be retrieved.
 
 ## Documentation
+
 
 ## Class Diagram
