@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <unistd.h>
-// #include "ServerUtils/ServerConnection.cpp"
 #include "ServerUtils/ToObject.cpp"
 #include "ServerUtils/WebserverConnection.cpp"
-// #include <fstream>
-// #include "ServerUtils/Endpoint.cpp"
+
 
 using namespace std;
 std::string returnAllNames(std::string req);
@@ -28,27 +26,16 @@ int main(){
     // // apis.push_back(a2);
     // newAPIServer.listenRest(apis);
     
-
-
     return 1;
 }
 
 std::string returnAllNames(std::string req){
-    // std::vector<std::string> names ={"John","Bob","Katy","Tina","Benny","Sammy"};
-    // string tmp="[";
-    // for(int i=0;i<names.size();i++){
-    //     string holder = "{id:'"+ std::to_string(i) + "',name:'"+names[i]+"'},";
-    //     tmp += holder;
-    // }
-    // tmp+="]";
-    // string tmp = "[\{\"id\":\"1\",\"name\":\"Bob\"},{\"id\":\"2\",\"name\":\"John\"}\]";
-
     Conversion::ToObject objectArray;
     for(int i=0;i<10;i++){
-        int id = objectArray.newObject();
-        objectArray.addToObject(id,"id",to_string(i));
-        objectArray.addToObject(id,"name","john"+to_string(i));
-        objectArray.addToObject(id,"location","NYC"+to_string(i));
+        int index = objectArray.newObject();
+        objectArray.addToObject(index,"id",to_string(i));
+        objectArray.addToObject(index,"name","john"+to_string(i));
+        objectArray.addToObject(index,"location","NYC"+to_string(i));
     }
     return objectArray.convertToJson();
 }
