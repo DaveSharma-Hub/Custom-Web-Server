@@ -1,7 +1,7 @@
 # Custom-Web-Server
 *In Progress*
 ## Description
-Creating a custom webserver from scratch similar to a Node.js server that can either host custom websites or create RESTful api endpoints using c++ web-sockets.
+Creating a custom webserver from scratch similar to a Node.js or Flask server that can either host custom websites or create RESTful api endpoints using c++ web-sockets.
 
 ## Usage
 Clone repository
