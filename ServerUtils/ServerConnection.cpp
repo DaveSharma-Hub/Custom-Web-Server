@@ -84,7 +84,7 @@ string Server::ServerConnection::findFile(const char* fileName,const char* fileT
             string fileLocation = string(fileName);
             string tmp="";
             ifstream image;
-            string file = "C:/Users/Daves/git/Custom-Web-Server/FileDirectory/"+fileLocation;
+            string file = "./FileDirectory/"+fileLocation;
             FILE* file_stream = fopen(file.c_str(), "r");
             // FILE *in = fopen(file.c_str(),"r");
 
@@ -115,7 +115,7 @@ string Server::ServerConnection::findFile(const char* fileName,const char* fileT
         ifstream file;
         string tmp="";
         cout<<fileName;
-        file.open("C:/Users/Daves/git/Custom-Web-Server/FileDirectory/"+fileLocation);
+        file.open("./FileDirectory/"+fileLocation);
         if(!file.is_open())
         {
             cout<<"Unable to open the file."<<endl;
